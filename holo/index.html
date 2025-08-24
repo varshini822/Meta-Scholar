@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaScholar - Mixed Reality AI Teacher</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f9c74f;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --card-bg: rgba(33, 37, 41, 0.8);
+            --glass-bg: rgba(33, 37, 41, 0.25);
+            --glass-border: rgba(33, 37, 41, 0.18);
+            --light: #343a40;
+            --dark: #f8f9fa;
+            --gray: #adb5bd;
+            --light-gray: #495057;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: white;
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-social:hover {
+            background: var(--light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 极要0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 50px;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .animated-bg .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .animated-bg .shape:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .animated-bg .shape:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .animated-bg .shape:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            background: var(--success);
+            top: 50%;
+            left: 70%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(20px, 20px) rotate(5deg);
+            }
+            50% {
+                transform: translate(0, 40px) rotate(0deg);
+            }
+            75% {
+                transform: translate(-20px, 20px) rotate(-5deg);
+            }
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15极要px 0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: var(--gray);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .hero-feature {
+            padding: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .hero-feature i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .hero极要-feature:hover i {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .hero-feature h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            transition: color 0.3s ease;
+        }
+
+        .hero-feature:hover h3 {
+            color: var(--primary);
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--primary);
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* How It Works Section */
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 30px 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover .step-number {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-detail:hover {
+            background: var(--light);
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact-detail:hover .contact-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .sidebar-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0极要.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--light);
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: var(--light);
+            border-radius: 30px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height极要: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left极要: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .dashboard-content {
+            padding: 0 0 30px 0;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .concept-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .concept-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .concept-card h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .concept-card p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        /* Concept Page */
+        .concept-page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .concept-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .model-viewer {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .model-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .chat-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            background: var(--primary);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: var(--light-gray);
+            color: var(--dark);
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 30px;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .chat-input button {
+            padding: 12px 20px;
+            border-radius: 30px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Quiz Page */
+        .quiz-page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            padding: 30px 0;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5极要px 15px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 极要1.2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15极要px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: var(--light);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .score-chart {
+            width: 100%;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        /* Settings Page */
+        .settings-page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .settings-container {
+            padding: 30px 0;
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border-radius极要: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .profile-form {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .profile-picture {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-picture img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload-btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .settings-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .footer-section p {
+            color: #adb5bd;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #495057;
+            color: #adb5bd;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .modal-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .modal-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .modal-tab:hover {
+            color: var(--primary);
+        }
+
+        .modal-tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-features,
+            .concept-grid,
+            .features-grid,
+            .process-steps,
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .concept-container,
+            .quiz-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: relative;
+                top: 0;
+                margin-bottom: 30px;
+            }
+            
+            .profile-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-features,
+            .concept-grid,
+            .features-grid,
+            .process-steps,
+            .contact-grid,
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Main Landing Page -->
+    <div id="main-page">
+        <!-- Header with Navigation -->
+        <header>
+            <div class="container">
+                <div class="navbar">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>MetaScholar</span>
+                        </div>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="#home" class="active">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <button class="btn btn-secondary" onclick="openAuthModal('login')">Login</button>
+                        <button class="btn btn-primary" onclick="openAuthModal('signup')">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="container">
+                <h1>Learn with Immersive Mixed Reality Experiences</h1>
+                <p>MetaScholar brings interactive 3D learning to your browser without any special hardware</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="loginWithGoogle()">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <button class="btn btn-secondary" onclick="openAuthModal('phone')">
+                        <i class="fas fa-phone"></i> Continue with Phone
+                    </button>
+                </div>
+                <div class="hero-features">
+                    <div class="hero-feature glass-card">
+                        <i class="fas fa-globe"></i>
+                        <h3>Web-Based MR Experience</h3>
+                        <p>Runs on any laptop and browser without special hardware</p>
+                    </div>
+                    <div class="hero-feature glass-card">
+                        <i class="fas fa-robot"></i>
+                        <h3>AI-Powered Teaching</h3>
+                        <p>Interactive explanations and quizzes powered by AI</p>
+                    </div>
+                    <div class="hero极要-feature glass-card">
+                        <i class="fas fa-gem"></极要i>
+                        <h3>Rich 3D Visualizations</h3>
+                        <p>Explore complex concepts with detailed 3D models</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="section features" id="features">
+            <div class="container">
+                <h2 class="section-title">What We Offer</h2>
+                <p class="section-subtitle">MetaScholar provides an immersive learning experience with cutting-edge technology</p>
+                <div class="features-grid">
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <h3>Interactive 3D Models</h3>
+                        <p>Manipulate and explore detailed 3D models to understand complex structures</p>
+                    </div>
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>AI Chat Assistance</h3>
+                        <p>Get instant explanations and answers to your questions from our AI tutor</p>
+                    </div>
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Adaptive Learning</h3>
+                        <p>Our system adjusts to your learning style and pace for optimal results</p>
+                    </div>
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>Gamified Learning</h3>
+                        <p>Earn points, badges, and rewards as you progress through lessons</p>
+                    </div>
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Progress Tracking</h3>
+                        <p>Monitor your learning journey with detailed analytics and insights</p>
+                    </div>
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Collaborative Learning</h3>
+                        <p>Study with friends and classmates in shared virtual spaces</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="section how-it-works" id="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Getting started with MetaScholar is simple and straightforward</p>
+                <div class="process-steps">
+                    <div class="step card">
+                        <div class="step-number">1</div>
+                        <h3>Sign Up</h3>
+                        <p>Create your account with email or social login</p>
+                    </div>
+                    <div class="step card">
+                        <div class="step-number">2</div>
+                        <h3>Choose a Subject</h3>
+                        <p>Select from our library of interactive lessons</p>
+                    </div>
+                    <div class="step card">
+                        <div class="step-number">3</div>
+                        <h3>Learn Interactively</h3>
+                        <p>Explore 3D models and chat with AI assistant</p>
+                    </div>
+                    <div class="step card">
+                        <div class="step-number">4</div>
+                        <h3>Test Your Knowledge</h3>
+                        <p>Complete quizzes to reinforce your learning</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section contact" id="contact">
+            <div class="container">
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="section-subtitle">Have questions or want to learn more? Reach out to our team</p>
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <div class="contact-detail card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h3>Email Us</h3>
+                                <p>support@metascholar.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-detail card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div>
+                                <h3>Call Us</h3>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="contact-detail card">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h3>Visit Us</h3>
+                                <p>123 EdTech Avenue, San Francisco, CA 94103</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-form card">
+                        <h3>Send a Message</h3>
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" placeholder="Enter your name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" placeholder="Enter your email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" placeholder="What is this regarding?" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" rows="5" placeholder="Type your message here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>MetaScholar</h3>
+                        <p>Transforming education through immersive mixed reality experiences powered by AI.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Quick Links</h3>
+                        <ul class="footer-links">
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#features">Features</a></li>
+                            <li><a href="#how-it-works">How It Works</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Subjects</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">Biology</a></li>
+                            <li><a href="#">Chemistry</a></li>
+                            <li><a href="#">Physics</a></li>
+                            <li><a href="#">Mathematics</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Connect With Us</h3>
+                        <div class="social-links" style="display: flex; gap: 15px; margin-top: 20px;">
+                            <a href="#" class="btn-social"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn-social"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn-social"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="btn-social"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2023 MetaScholar. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard" class="dashboard">
+        <header>
+            <div class="container">
+                <div class="navbar">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>MetaScholar</span>
+                        </div>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="#" class="active">Dashboard</a></li>
+                        <li><a href="#">My Courses</a></li>
+                        <li><a href="#">Progress</a></li>
+                        <li><a href="#">Resources</a></li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <button class="btn btn-secondary" onclick="showSettings()">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                        <button class="btn btn-primary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container dashboard-container">
+            <div class="sidebar">
+                <h3 class="sidebar-title">My Subjects</h3>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item active">
+                        <i class="fas fa-dna"></i> Biology
+                    </li>
+                    <li class="sidebar-item">
+                        <i class="fas fa-flask"></i> Chemistry
+                    </li>
+                    <li class="sidebar-item">
+                        <i class="fas fa-atom"></i> Physics
+                    </li>
+                    <li class="sidebar-item">
+                        <i class="fas fa-calculator"></i> Mathematics
+                    </li>
+                </ul>
+                
+                <h3 class="sidebar-title">My Progress</h3>
+                <div class="progress-card card">
+                    <h4>Overall Completion</h4>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 65%"></div>
+                    </div>
+                    <p>65% Complete</p>
+                </div>
+                
+                <div class="theme-toggle">
+                    <span>Dark Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="profile-summary card">
+                    <img src="https://via.placeholder.com/50" alt="Profile" class="profile-pic">
+                    <div>
+                        <h4>Alex Johnson</h4>
+                        <p>Student</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-content">
+                <div class="dashboard-header">
+                    <h2>Biology Concepts</h2>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search concepts..." style="padding: 10px 15px; border-radius: 30px; border: 1px solid var(--light-gray); width: 250px;">
+                    </div>
+                </div>
+                
+                <div class="concept-grid">
+                    <div class="concept-card" onclick="openConcept('cell')">
+                        <div class="concept-icon">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h3>Cell Structure</h3>
+                        <p>Explore the building blocks of life with interactive 3D models of animal and plant cells.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 80%"></div>
+                        </div>
+                        <p>80% Complete</p>
+                    </div>
+                    
+                    <div class="concept-card" onclick="openConcept('dna')">
+                        <div class="concept-icon">
+                            <i class="fas fa-dna"></i>
+                        </div>
+                        <h3>DNA & Genetics</h3>
+                        <p>Unravel the mysteries of genetics with our interactive DNA model and inheritance simulations.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 45%"></div>
+                        </div>
+                        <p>45% Complete</p>
+                    </div>
+                    
+                    <div class="concept-card" onclick="openConcept('human-brain')">
+                        <div class="concept-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Human Brain</h3>
+                        <p>Discover the complexities of the human brain with our detailed 3D model and functional areas.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 30%"></div>
+                        </div>
+                        <p>30% Complete</p>
+                    </div>
+                    
+                    <div class="concept-card" onclick="openConcept('ecosystem')">
+                        <div class="concept-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3>Ecosystems</h3>
+                        <p>Understand how different organisms interact within various ecosystems around the world.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 20%"></div>
+                        </div>
+                        <p>20% Complete</p>
+                    </div>
+                    
+                    <div class="concept-card" onclick="openConcept('evolution')">
+                        <div class="concept-icon">
+                            <i class="fas fa-fish"></i>
+                        </div>
+                        <h3>Evolution</h3>
+                        <p>Trace the path of evolution through interactive timelines and species comparison tools.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 10%"></div>
+                        </div>
+                        <p>10% Complete</p>
+                    </div>
+                    
+                    <div class="concept-card" onclick="openConcept('human-heart')">
+                        <div class="concept-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Human Heart</h3>
+                        <p>Explore the human cardiovascular system with our beating heart model and blood flow simulation.</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 5%"></div>
+                        </div>
+                        <p>5% Complete</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Concept Page -->
+    <div id="concept-page" class="concept-page">
+        <header>
+            <div class="container">
+                <div class="navbar">
+                    <div class="logo-container">
+                        <button class="btn btn-secondary" onclick="backToDashboard()" style="margin-right: 15px;">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="logo">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>MetaScholar</span>
+                        </div>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="#" class="active">Cell Structure</a></li>
+                        <li><a href="#">3D Model</a></li>
+                        <li><a href="#">AI Tutor</a></li>
+                        <li><a href="#">Quiz</a></li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <button class="btn btn-secondary" onclick="showSettings()">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                        <button class="btn btn-primary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container concept-container">
+            <div class="model-viewer card">
+                <div class="model-placeholder">
+                    <div style="text-align: center;">
+                        <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>Interactive 3D Cell Model</p>
+                        <p>Rotate, zoom, and explore the cell structure</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-container card">
+                <h3>AI Tutor - Ask about Cell Structure</h3>
+                <div class="chat-messages">
+                    <div class="message bot">
+                        Hi! I'm your biology tutor. What would you like to know about cell structure?
+                    </div>
+                    <div class="message user">
+                        What's the difference between plant and animal cells?
+                    </div>
+                    <div class="message bot">
+                        Great question! Plant cells have cell walls and chloroplasts, while animal cells do not. Plant cells also have larger vacuoles.
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask a question about cell structure...">
+                    <button class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary">
+                    <i class="fas fa-book"></i> View Study Materials
+                </button>
+                <button class="btn btn-secondary" onclick="startQuiz()">
+                    <i class="fas fa-question-circle"></i> Take a Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Page -->
+    <div id="quiz-page" class="quiz-page">
+        <header>
+            <div class="container">
+                <div class="navbar">
+                    <div class="logo-container">
+                        <button class="btn btn-secondary" onclick="backToConcept()" style="margin-right: 15px;">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="logo">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>MetaScholar</span>
+                        </div>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="#" class="active">Cell Structure Quiz</a></li>
+                        <li><a href="#">Question 1 of 5</a></li>
+                        <li><a href="#">Score: 0</a></li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <button class="btn btn-secondary" onclick="showSettings()">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                        <button class="btn btn-primary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container quiz-container">
+            <div class="quiz-header">
+                <h2>Cell Structure Quiz</h2>
+                <p>Test your knowledge about cell biology</p>
+            </div>
+            
+            <div class="quiz-content">
+                <div class="question-card card">
+                    <div class="question-text">
+                        <h3>Question 1: Which organelle is known as the powerhouse of the cell?</h3>
+                    </div>
+                    <div class="options-container">
+                        <div class="option" onclick="selectOption(this)">
+                            Nucleus
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            Mitochondrion
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            Endoplasmic Reticulum
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            Golgi Apparatus
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-controls">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-card card">
+                    <h3>Quiz Progress</h3>
+                    <div class="score-chart">
+                        <!-- This would be a canvas for a chart in a real implementation -->
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--light); border-radius: 8px;">
+                            <p>Progress Chart</p>
+                        </div>
+                    </div>
+                    <div class="quiz-stats">
+                        <p><strong>Questions:</strong> 1/5</p>
+                        <p><strong>Correct:</strong> 0</p>
+                        <p><strong>Score:</strong> 0%</p>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                        <i class="fas fa-flag"></i> Finish Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="settings-page">
+        <header>
+            <div class="container">
+                <div class="navbar">
+                    <div class="logo-container">
+                        <button class="btn btn-secondary" onclick="backToDashboard()" style="margin-right: 15px;">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="logo">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>MetaScholar</span>
+                        </div>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="#" class="active">Settings</a></li>
+                        <li><a href="#">Profile</a></li>
+                        <li><a href="#">Preferences</a></li>
+                        <li><a href="#">Account</a></li>
+                    </ul>
+                    <div class="auth-buttons">
+                        <button class="btn btn-primary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container settings-container">
+            <div class="settings-card card">
+                <h2>Profile Settings</h2>
+                <div class="profile-form">
+                    <div class="profile-picture">
+                        <img src="https://via.placeholder.com/150" alt="Profile" id="profile-pic">
+                        <div class="file-upload">
+                            <span class="file-upload-btn">Change Picture</span>
+                            <input type="file" accept="image/*" onchange="previewImage(this)">
+                        </div>
+                    </div>
+                    
+                    <div class="form-fields">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <input type="text" id="first-name" value="Alex">
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name" value="Johnson">
+                            </div>
+                            <div class="form-group">
+                                <label for="user-email">Email</label>
+                                <input type="email" id="user-email" value="alex.johnson@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="user-phone">Phone</label>
+                                <input type="tel" id="user-phone" value="(555) 123-4567">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="user-bio">Bio</label>
+                                <textarea id="user-bio" rows="3">Biology student interested in genetics and molecular biology.</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-actions">
+                            <button class="btn btn-secondary">Cancel</button>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-card card">
+                <h2>Preferences</h2>
+                <div class="form-group">
+                    <label for="notifications">Email Notifications</label>
+                    <select id="notifications">
+                        <option>All notifications</option>
+                        <option>Important only</option>
+                        <option>None</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option>English</option>
+                        <option>Spanish</option>
+                        <option>French</option>
+                        <option>German</option>
+                    </select>
+                </div>
+                <div class="theme-toggle" style="margin: 20px 0;">
+                    <span>Dark Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="settings-theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-actions">
+                    <button class="btn btn-primary">Save Preferences</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Login to Your Account</h2>
+                <div class="close-modal" onclick="closeAuthModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            
+            <div class="modal-tabs">
+                <div class="modal-tab active" onclick="switchAuthTab('login')">Login</div>
+                <div class="modal-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+            </div>
+            
+            <div class="modal-body">
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="auth-email">Email Address</label>
+                        <input type="email" id="auth-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="form-group" id="confirm-password-group" style="display: none;">
+                        <label for="auth-confirm-password">Confirm Password</label>
+                        <input type="password" id="auth-confirm-password" placeholder="Confirm your password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Login
+                    </button>
+                </form>
+                
+                <div class="social-login">
+                    <button class="btn-social" onclick="loginWithGoogle()">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <button class="btn-social" onclick="loginWithFacebook()">
+                        <i class="fab fa-facebook-f"></i> Continue with Facebook
+                    </button>
+                    <button class="btn-social" onclick="openAuthModal('phone')">
+                        <i class="fas fa-phone"></i> Continue with Phone
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const mainPage = document.getElementById('main-page');
+        const dashboard = document.getElementById('dashboard');
+        const conceptPage = document.getElementById('concept-page');
+        const quizPage = document.getElementById('quiz-page');
+        const settingsPage = document.getElementById('settings-page');
+        const authModal = document.getElementById('auth-modal');
+        const themeToggle = document.getElementById('theme-toggle');
+        const settingsThemeToggle = document.getElementById('settings-theme-toggle');
+        
+        // Auth Modal Elements
+        const modalTitle = document.getElementById('modal-title');
+        const authForm = document.getElementById('auth-form');
+        const confirmPasswordGroup = document.getElementById('confirm-password-group');
+        const authSubmitButton = authForm.querySelector('button[type="submit"]');
+        
+        // Initialize theme
+        function initTheme() {
+            const isDark = localStorage.getItem('darkTheme') === 'true';
+            document.body.classList.toggle('dark-theme', isDark);
+            if (themeToggle) themeToggle.checked = isDark;
+            if (settingsThemeToggle) settingsThemeToggle.checked = isDark;
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('darkTheme', isDark);
+            if (themeToggle) themeToggle.checked = isDark;
+            if (settingsThemeToggle) settingsThemeToggle.checked = isDark;
+        }
+        
+        // Open auth modal
+        function openAuthModal(type) {
+            authModal.style.display = 'flex';
+            setTimeout(() => authModal.classList.add('show'), 10);
+            switchAuthTab(type);
+        }
+        
+        // Close auth modal
+        function closeAuthModal() {
+            authModal.classList.remove('show');
+            setTimeout(() => authModal.style.display = 'none', 300);
+        }
+        
+        // Switch auth tab
+        function switchAuthTab(type) {
+            const tabs = document.querySelectorAll('.modal-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            if (type === 'login') {
+                modalTitle.textContent = 'Login to Your Account';
+                confirmPasswordGroup.style.display = 'none';
+                authSubmitButton.textContent = 'Login';
+                tabs[0].classList.add('active');
+            } else if (type === 'signup') {
+                modalTitle.textContent = 'Create an Account';
+                confirmPasswordGroup.style.display = 'flex';
+                authSubmitButton.textContent = 'Sign Up';
+                tabs[1].classList.add('active');
+            } else if (type === 'phone') {
+                modalTitle.textContent = 'Continue with Phone';
+                // This would show phone input fields in a real implementation
+                confirmPasswordGroup.style.display = 'none';
+                authSubmitButton.textContent = 'Send Code';
+            }
+        }
+        
+        // Login with Google
+        function loginWithGoogle() {
+            // Simulate login
+            showDashboard();
+            closeAuthModal();
+        }
+        
+        // Login with Facebook
+        function loginWithFacebook() {
+            // Simulate login
+            showDashboard();
+            closeAuthModal();
+        }
+        
+        // Show dashboard
+        function showDashboard() {
+            mainPage.style.display = 'none';
+            dashboard.style.display = 'block';
+            conceptPage.style.display = 'none';
+            quizPage.style.display = 'none';
+            settingsPage.style.display = 'none';
+        }
+        
+        // Open concept
+        function openConcept(concept) {
+            dashboard.style.display = 'none';
+            conceptPage.style.display = 'block';
+        }
+        
+        // Back to dashboard
+        function backToDashboard() {
+            dashboard.style.display = 'block';
+            conceptPage.style.display = 'none';
+            quizPage.style.display = 'none';
+            settingsPage.style.display = 'none';
+        }
+        
+        // Back to concept
+        function backToConcept() {
+            conceptPage.style.display = 'block';
+            quizPage.style.display = 'none';
+        }
+        
+        // Start quiz
+        function startQuiz() {
+            conceptPage.style.display = 'none';
+            quizPage.style.display = 'block';
+        }
+        
+        // Show settings
+        function showSettings() {
+            dashboard.style.display = 'none';
+            settingsPage.style.display = 'block';
+        }
+        
+        // Logout
+        function logout() {
+            dashboard.style.display = 'none';
+            conceptPage.style.display = 'none';
+            quizPage.style.display = 'none';
+            settingsPage.style.display = 'none';
+            mainPage.style.display = 'block';
+        }
+        
+        // Select quiz option
+        function selectOption(element) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+        
+        // Preview image
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-pic').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            
+            // Theme toggles
+            if (themeToggle) {
+                themeToggle.addEventListener('change', toggleTheme);
+            }
+            if (settingsThemeToggle) {
+                settingsThemeToggle.addEventListener('change', toggleTheme);
+            }
+            
+            // Auth form submission
+            authForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                showDashboard();
+                closeAuthModal();
+            });
+            
+            // Contact form submission
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thank you for your message! We will get back to you soon.');
+                    contactForm.reset();
+                });
+            }
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    closeAuthModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
